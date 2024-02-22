@@ -4,7 +4,18 @@
 
 package db
 
-import ()
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type AdminsOfGroupListRequest struct {
+	ID          int64
+	ChatID      pgtype.Int8
+	GroupListID pgtype.Int8
+	Username    pgtype.Text
+	FirstName   pgtype.Text
+	SecondName  pgtype.Text
+}
 
 type GroupList struct {
 	ID   int64

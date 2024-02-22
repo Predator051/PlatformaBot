@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"server/db"
 	"server/db/redis"
+	"slices"
 )
 
 var AuthToken = "Bius2019!"
@@ -122,11 +123,104 @@ func NewServer(port int) {
 		writer.WriteHeader(http.StatusOK)
 	}).Methods(http.MethodPost, http.MethodOptions)
 
+	r.HandleFunc("/api/delete/group_lists", func(writer http.ResponseWriter, request *http.Request) {
+
+		parsedBody := parseBody(request, &writer)
+
+		if parsedBody["id"] == nil {
+			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write([]byte("There is no id field"))
+			return
+		}
+
+		conn, err := db.NewConn()
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while connect to db"))
+			return
+		}
+
+		defer conn.Close(db.Ctx)
+
+		err = db.New(conn).DeleteGroupList(db.Ctx, int64(parsedBody["id"].(float64)))
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while fetch group lists: " + err.Error()))
+			return
+		}
+
+		writer.WriteHeader(http.StatusOK)
+	}).Methods(http.MethodPost, http.MethodOptions)
+
+	r.HandleFunc("/api/group_lists/admin/requests", func(writer http.ResponseWriter, request *http.Request) {
+		conn, err := db.NewConn()
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while connect to db"))
+			println(err.Error())
+			return
+		}
+
+		defer conn.Close(db.Ctx)
+
+		groupListRequests, err := db.New(conn).ListAdminsGroupListRequest(db.Ctx)
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while fetch group lists requests: " + err.Error()))
+			return
+		}
+
+		groupLists := []db.GroupList{}
+		for _, listRequest := range groupListRequests {
+			indx := slices.IndexFunc(groupLists, func(list db.GroupList) bool {
+				return list.ID == listRequest.GroupListID.Int64
+			})
+
+			if indx >= 0 {
+				continue
+			}
+
+			grList, err := db.New(conn).GroupListById(db.Ctx, listRequest.GroupListID.Int64)
+			if err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				writer.Write([]byte("Error while fetch group lists requests: " + err.Error()))
+				return
+			}
+
+			groupLists = append(groupLists, grList)
+		}
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while fetch group lists requests: " + err.Error()))
+			return
+		}
+
+		responseData, err := json.Marshal(struct {
+			Requests   []db.AdminsOfGroupListRequest `json:"requests"`
+			GroupLists []db.GroupList                `json:"groupLists"`
+		}{groupListRequests, groupLists})
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Write([]byte("Error while preparing response"))
+			return
+		}
+
+		writer.WriteHeader(http.StatusOK)
+		writer.Write(responseData)
+	}).Methods(http.MethodPost, http.MethodOptions)
+
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "http://127.0.0.1:8080", "*"},
 		AllowCredentials: true,
 		Debug:            true,
 		AllowedHeaders:   []string{"Access-Control-Allow-Origin", "Content-Type"},
 	}).Handler(r)
+
 	http.ListenAndServe(fmt.Sprintf("%s:%d", "127.0.0.1", port), handler)
 }

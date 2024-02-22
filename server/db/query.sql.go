@@ -7,7 +7,61 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const deleteGroupList = `-- name: DeleteGroupList :exec
+delete from group_lists where id = $1
+`
+
+func (q *Queries) DeleteGroupList(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteGroupList, id)
+	return err
+}
+
+const deleteListAdminsGroupListRequest = `-- name: DeleteListAdminsGroupListRequest :exec
+delete from admins_of_group_list_request where id = $1
+`
+
+func (q *Queries) DeleteListAdminsGroupListRequest(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteListAdminsGroupListRequest, id)
+	return err
+}
+
+const groupListById = `-- name: GroupListById :one
+select id, name from group_lists where id = $1
+`
+
+func (q *Queries) GroupListById(ctx context.Context, id int64) (GroupList, error) {
+	row := q.db.QueryRow(ctx, groupListById, id)
+	var i GroupList
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
+const insertListAdminsGroupListRequest = `-- name: InsertListAdminsGroupListRequest :exec
+insert into admins_of_group_list_request (id, chat_id, group_list_id, first_name, second_name, username) VALUES (default, $1, $2, $3, $4, $5)
+`
+
+type InsertListAdminsGroupListRequestParams struct {
+	ChatID      pgtype.Int8
+	GroupListID pgtype.Int8
+	FirstName   pgtype.Text
+	SecondName  pgtype.Text
+	Username    pgtype.Text
+}
+
+func (q *Queries) InsertListAdminsGroupListRequest(ctx context.Context, arg InsertListAdminsGroupListRequestParams) error {
+	_, err := q.db.Exec(ctx, insertListAdminsGroupListRequest,
+		arg.ChatID,
+		arg.GroupListID,
+		arg.FirstName,
+		arg.SecondName,
+		arg.Username,
+	)
+	return err
+}
 
 const insertNewGroupList = `-- name: InsertNewGroupList :exec
 insert into group_lists (id, name) VALUES (default, $1)
@@ -16,6 +70,37 @@ insert into group_lists (id, name) VALUES (default, $1)
 func (q *Queries) InsertNewGroupList(ctx context.Context, name string) error {
 	_, err := q.db.Exec(ctx, insertNewGroupList, name)
 	return err
+}
+
+const listAdminsGroupListRequest = `-- name: ListAdminsGroupListRequest :many
+select id, chat_id, group_list_id, username, first_name, second_name from admins_of_group_list_request order by id
+`
+
+func (q *Queries) ListAdminsGroupListRequest(ctx context.Context) ([]AdminsOfGroupListRequest, error) {
+	rows, err := q.db.Query(ctx, listAdminsGroupListRequest)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AdminsOfGroupListRequest
+	for rows.Next() {
+		var i AdminsOfGroupListRequest
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.GroupListID,
+			&i.Username,
+			&i.FirstName,
+			&i.SecondName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listGroupList = `-- name: ListGroupList :many

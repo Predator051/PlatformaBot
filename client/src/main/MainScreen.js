@@ -1,18 +1,10 @@
 import {
-    Alert,
-    AlertIcon,
-    Box,
-    Button,
-    Center,
-    Input,
-    InputGroup,
-    InputRightElement,
-    Spacer,
-    Stack, Tab, TabList, TabPanel, TabPanels, Tabs
+Tab, TabList, TabPanel, TabPanels, Tabs
 } from '@chakra-ui/react'
 import React from "react";
 import axios, {AxiosHeaders} from "axios";
 import {GroupListTab} from "./group_lists_tab/GroupListTab";
+import {GroupListAdminRequestTab} from "./group_lists_tab/GroupListAdminRequestTab";
 
 export function MainScreen() {
 
@@ -27,7 +19,7 @@ export function MainScreen() {
                     <GroupListTab></GroupListTab>
                 </TabPanel>
                 <TabPanel>
-                    <p>Here is admins should be</p>
+                    <GroupListAdminRequestTab></GroupListAdminRequestTab>
                 </TabPanel>
             </TabPanels>
         </Tabs>

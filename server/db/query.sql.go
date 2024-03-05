@@ -20,12 +20,44 @@ func (q *Queries) DeleteGroupList(ctx context.Context, id int64) error {
 	return err
 }
 
+const deleteGroupListAdmins = `-- name: DeleteGroupListAdmins :exec
+delete from group_lists_admins where id = $1
+`
+
+func (q *Queries) DeleteGroupListAdmins(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteGroupListAdmins, id)
+	return err
+}
+
 const deleteListAdminsGroupListRequest = `-- name: DeleteListAdminsGroupListRequest :exec
 delete from admins_of_group_list_request where id = $1
 `
 
 func (q *Queries) DeleteListAdminsGroupListRequest(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteListAdminsGroupListRequest, id)
+	return err
+}
+
+const deleteListAdminsGroupListRequestByGroupAndChatId = `-- name: DeleteListAdminsGroupListRequestByGroupAndChatId :exec
+delete from admins_of_group_list_request where group_list_id = $1 and chat_id = $2
+`
+
+type DeleteListAdminsGroupListRequestByGroupAndChatIdParams struct {
+	GroupListID pgtype.Int4
+	ChatID      pgtype.Int8
+}
+
+func (q *Queries) DeleteListAdminsGroupListRequestByGroupAndChatId(ctx context.Context, arg DeleteListAdminsGroupListRequestByGroupAndChatIdParams) error {
+	_, err := q.db.Exec(ctx, deleteListAdminsGroupListRequestByGroupAndChatId, arg.GroupListID, arg.ChatID)
+	return err
+}
+
+const deleteSubscriptionToGroupList = `-- name: DeleteSubscriptionToGroupList :exec
+delete from subscription_to_group_lists where id = $1
+`
+
+func (q *Queries) DeleteSubscriptionToGroupList(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteSubscriptionToGroupList, id)
 	return err
 }
 
@@ -40,13 +72,53 @@ func (q *Queries) GroupListById(ctx context.Context, id int64) (GroupList, error
 	return i, err
 }
 
+const groupListsByAdmin = `-- name: GroupListsByAdmin :many
+select id, chat_id, group_list_id from group_lists_admins where chat_id = $1
+`
+
+func (q *Queries) GroupListsByAdmin(ctx context.Context, chatID pgtype.Int8) ([]GroupListsAdmin, error) {
+	rows, err := q.db.Query(ctx, groupListsByAdmin, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GroupListsAdmin
+	for rows.Next() {
+		var i GroupListsAdmin
+		if err := rows.Scan(&i.ID, &i.ChatID, &i.GroupListID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertGroupListAdmins = `-- name: InsertGroupListAdmins :exec
+
+insert into group_lists_admins (id, chat_id, group_list_id) VALUES (default, $1, $2)
+`
+
+type InsertGroupListAdminsParams struct {
+	ChatID      pgtype.Int8
+	GroupListID pgtype.Int4
+}
+
+// --------GROUP LIST ADMINS----------
+func (q *Queries) InsertGroupListAdmins(ctx context.Context, arg InsertGroupListAdminsParams) error {
+	_, err := q.db.Exec(ctx, insertGroupListAdmins, arg.ChatID, arg.GroupListID)
+	return err
+}
+
 const insertListAdminsGroupListRequest = `-- name: InsertListAdminsGroupListRequest :exec
 insert into admins_of_group_list_request (id, chat_id, group_list_id, first_name, second_name, username) VALUES (default, $1, $2, $3, $4, $5)
 `
 
 type InsertListAdminsGroupListRequestParams struct {
 	ChatID      pgtype.Int8
-	GroupListID pgtype.Int8
+	GroupListID pgtype.Int4
 	FirstName   pgtype.Text
 	SecondName  pgtype.Text
 	Username    pgtype.Text
@@ -72,10 +144,37 @@ func (q *Queries) InsertNewGroupList(ctx context.Context, name string) error {
 	return err
 }
 
+const insertSubscriptionToGroupList = `-- name: InsertSubscriptionToGroupList :exec
+
+insert into subscription_to_group_lists (id, chat_id, group_list_id, username, title, chat_type) VALUES (default, $1, $2, $3, $4, $5)
+`
+
+type InsertSubscriptionToGroupListParams struct {
+	ChatID      pgtype.Int8
+	GroupListID pgtype.Int4
+	Username    pgtype.Text
+	Title       pgtype.Text
+	ChatType    pgtype.Text
+}
+
+// --------SUBSCRIPTIONS TO GROUP LIST----------
+func (q *Queries) InsertSubscriptionToGroupList(ctx context.Context, arg InsertSubscriptionToGroupListParams) error {
+	_, err := q.db.Exec(ctx, insertSubscriptionToGroupList,
+		arg.ChatID,
+		arg.GroupListID,
+		arg.Username,
+		arg.Title,
+		arg.ChatType,
+	)
+	return err
+}
+
 const listAdminsGroupListRequest = `-- name: ListAdminsGroupListRequest :many
+
 select id, chat_id, group_list_id, username, first_name, second_name from admins_of_group_list_request order by id
 `
 
+// --------REQUEST----------
 func (q *Queries) ListAdminsGroupListRequest(ctx context.Context) ([]AdminsOfGroupListRequest, error) {
 	rows, err := q.db.Query(ctx, listAdminsGroupListRequest)
 	if err != nil {
@@ -117,6 +216,99 @@ func (q *Queries) ListGroupList(ctx context.Context) ([]GroupList, error) {
 	for rows.Next() {
 		var i GroupList
 		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const subscriptionToGroupLists = `-- name: SubscriptionToGroupLists :many
+select id, chat_id, group_list_id, username, title, chat_type from subscription_to_group_lists
+`
+
+func (q *Queries) SubscriptionToGroupLists(ctx context.Context) ([]SubscriptionToGroupList, error) {
+	rows, err := q.db.Query(ctx, subscriptionToGroupLists)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SubscriptionToGroupList
+	for rows.Next() {
+		var i SubscriptionToGroupList
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.GroupListID,
+			&i.Username,
+			&i.Title,
+			&i.ChatType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const subscriptionToGroupListsByChatId = `-- name: SubscriptionToGroupListsByChatId :many
+select id, chat_id, group_list_id, username, title, chat_type from subscription_to_group_lists where chat_id = $1
+`
+
+func (q *Queries) SubscriptionToGroupListsByChatId(ctx context.Context, chatID pgtype.Int8) ([]SubscriptionToGroupList, error) {
+	rows, err := q.db.Query(ctx, subscriptionToGroupListsByChatId, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SubscriptionToGroupList
+	for rows.Next() {
+		var i SubscriptionToGroupList
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.GroupListID,
+			&i.Username,
+			&i.Title,
+			&i.ChatType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const subscriptionToGroupListsByGroupListId = `-- name: SubscriptionToGroupListsByGroupListId :many
+select id, chat_id, group_list_id, username, title, chat_type from subscription_to_group_lists where group_list_id = $1
+`
+
+func (q *Queries) SubscriptionToGroupListsByGroupListId(ctx context.Context, groupListID pgtype.Int4) ([]SubscriptionToGroupList, error) {
+	rows, err := q.db.Query(ctx, subscriptionToGroupListsByGroupListId, groupListID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SubscriptionToGroupList
+	for rows.Next() {
+		var i SubscriptionToGroupList
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.GroupListID,
+			&i.Username,
+			&i.Title,
+			&i.ChatType,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

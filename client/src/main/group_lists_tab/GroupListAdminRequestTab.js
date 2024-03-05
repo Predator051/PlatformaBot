@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 
 export function GroupListAdminRequestTab() {
-    let [groupListRequest, setGroupListRequest] = useState([])
+    let [groupListRequests, setGroupListRequests] = useState([])
     let [groupLists, setGroupLists] = useState([])
     // {
     //     "ID": 11,
@@ -26,19 +26,26 @@ export function GroupListAdminRequestTab() {
     // }
     useEffect(() => {
         SendPost('api/group_lists/admin/requests', {}).then(r => {
-            setGroupListRequest(r.data.requests)
+            setGroupListRequests(r.data.requests)
             setGroupLists(r.data.groupLists)
             console.log(r.data)
         })
     }, []);
 
-    const clickDeleteGroupList = (id) => {
-        // SendPost("api/delete/group_lists", {id}).then(value => {
-        //     SendPost('api/group_lists', {}).then(r => {
-        //         setGroupListRequest(r.data)
-        //         console.log(r.data)
-        //     })
-        // }, error => {})
+    const clickAcceptRequest = (groupListRequest) => {
+        console.log(groupListRequest)
+        SendPost("api/group_lists/admin/accept",
+            {
+                group_lists_id: groupListRequest.GroupListID,
+                chat_id: groupListRequest.ChatID
+            }).then(value => {
+            SendPost('api/group_lists/admin/requests', {}).then(r => {
+                setGroupListRequests(r.data.requests)
+                setGroupLists(r.data.groupLists)
+                console.log(r.data)
+            })
+        }, error => {
+        })
     }
 
     return (
@@ -46,7 +53,7 @@ export function GroupListAdminRequestTab() {
             <Stack spacing={3}>
                 <OrderedList>
                     {
-                        groupListRequest?.map((v) => <ListItem itemID={v.ID} key={v.ID}>
+                        groupListRequests?.map((v) => <ListItem itemID={v.ID} key={v.ID}>
                             <Flex height={10}>
                                 User {' '}
                                 [{v.Username} {' '}
@@ -55,7 +62,7 @@ export function GroupListAdminRequestTab() {
                                 requests for administration of {' '}
                                 {groupLists?.find(gl => gl.ID == v.GroupListID)?.Name}
                                 <Spacer/>
-                                <Button colorScheme='green' leftIcon={<MdDone/>} mr={1}>
+                                <Button colorScheme='green' leftIcon={<MdDone/>} mr={1} onClick={()=>clickAcceptRequest(v)}>
                                     Accept
                                 </Button>
                                 <Button colorScheme='red' leftIcon={<MdClose/>}>

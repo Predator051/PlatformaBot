@@ -67,8 +67,8 @@ func RequestForAdminsPrivileges(bot *telego.Bot, update *objects.Update) {
 					String: chat.LastName,
 					Valid:  true,
 				},
-				GroupListID: pgtype.Int8{
-					Int64: groupListID,
+				GroupListID: pgtype.Int4{
+					Int32: int32(groupListID),
 					Valid: true,
 				},
 			})

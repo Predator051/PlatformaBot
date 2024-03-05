@@ -7,7 +7,11 @@ import (
 	"github.com/SakoDroid/telego/v2/objects"
 	"os"
 	"server/bot/cmds"
+	"slices"
+	"strings"
 )
+
+var Bot *telego.Bot
 
 func New(token string) {
 	bot, err := telego.NewBot(&cfg.BotConfigs{
@@ -23,27 +27,37 @@ func New(token string) {
 		os.Exit(1)
 	}
 
+	Bot = bot
+
 	bot.AddHandler(string(cmds.RequestForAdminsPrivilegesName), func(update *objects.Update) {
 		cmds.RequestForAdminsPrivileges(bot, update)
 	}, "private")
 
+	updateChannel := *(bot.GetUpdateChannel())
+
+	go func() {
+		for {
+			update := <-updateChannel
+
+			if update.Message != nil {
+				println(update.Message.Text)
+			}
+
+			if slices.Contains([]string{
+				"private", "group",
+			}, update.Message.Chat.Type) && strings.Contains(update.Message.Text, string(cmds.SubscribeToGroupNewsName)) {
+				cmds.SubscribeToGroupNews(bot, update)
+			}
+
+			if strings.Contains(update.Message.Text, string(cmds.SendMsgToChannelName)) {
+				cmds.SendMsgToChannel(bot, update)
+			}
+		}
+	}()
+
+	//bot.AddHandler(string(cmds.SubscribeToGroupNewsName), func(update *objects.Update) {
+	//	cmds.SubscribeToGroupNews(bot, update)
+	//}, "private", "group")
+
 	bot.Run(true)
-	//
-	//updates, _ := bot.UpdatesViaLongPolling(nil)
-	//bh, err := th.NewBotHandler(bot, updates)
-	//
-	//if err != nil {
-	//	println(err)
-	//}
-	//
-	//defer bh.Stop()
-	//defer bot.StopLongPolling()
-	//
-	//bh.Handle(func(bot *telego.Bot, update telego.Update) {
-	//	println("Handle " + cmds.RequestForAdminsPrivilegesName)
-	//	cmds.RequestForAdminsPrivileges(bot, update, bh)
-	//}, th.CommandEqual(string(cmds.RequestForAdminsPrivilegesName)))
-	//
-	//bh.Start()
-	//println("Stop bot!")
 }

@@ -25,5 +25,5 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.REMOTE_KEY }}
           port: 22
-          script: whoami
+          script: pwd
           

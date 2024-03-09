@@ -38,7 +38,7 @@ jobs:
           remote_key: ${{ secrets.REMOTE_KEY }}
           remote_path: ${{ secrets.REMOTE_PATH }}
 
-      - name: build server
+      - name: setup client to web server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -46,6 +46,6 @@ jobs:
           key: ${{ secrets.REMOTE_KEY }}
           port: 22
           script: |
-            cd github_action_deployments/platforma_bot/server
-            go build -o server_bin
+            rm -rv /var/www/html/platforma_bot_admin/*
+            cp build/* /var/www/html/platforma_bot_admin/
           

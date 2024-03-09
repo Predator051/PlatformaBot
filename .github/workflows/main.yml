@@ -12,8 +12,13 @@ jobs:
         with:
           node-version: '21.6.2'
       - run: cd client && npm install && npm run build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.22.0'
+      - run: cd server && go build -o server_bin
       
-      - name: rsync deploy
+      - name: rsync deploy client build
         uses: burnett01/rsync-deployments@5.2.1
         with:
           switches: -avz --exclude '.git' --exclude '.github' --exclude '.gitignore'

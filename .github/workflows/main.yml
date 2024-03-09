@@ -26,6 +26,6 @@ jobs:
           key: ${{ secrets.REMOTE_KEY }}
           port: 22
           script: |
-            cd /github_action_deployments/platforma_bot/server
+            cd github_action_deployments/platforma_bot/server
             go build -o server_bin
           

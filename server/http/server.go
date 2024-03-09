@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"log"
 	"math/rand"
 	"net/http"
+	"server/helper"
 )
 
 var AuthToken = "Bius2019!"
@@ -49,5 +51,6 @@ func NewServer(port int) {
 		AllowedHeaders:   []string{"Access-Control-Allow-Origin", "Content-Type"},
 	}).Handler(r)
 
-	http.ListenAndServe(fmt.Sprintf("%s:%d", "127.0.0.1", port), handler)
+	log.Println(fmt.Sprintf("Started server on %s:%d", helper.SERVER_IP, port))
+	http.ListenAndServe(fmt.Sprintf("%s:%d", helper.SERVER_IP, port), handler)
 }

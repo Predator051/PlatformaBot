@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/SakoDroid/telego/v2 v2.1.0
-	github.com/davecgh/go-spew v1.1.1
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.5.3
 	github.com/redis/go-redis/v9 v9.5.1

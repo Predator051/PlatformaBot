@@ -1,7 +1,7 @@
 import axios, {AxiosHeaders} from "axios";
 
 export async function SendPost(url, data) {
-    return await axios.post("http://localhost:8080/" + url, {
+    return await axios.post(`http://${process.env.REACT_APP_PB_SERVER_IP}:8080/${url}`, {
         ...data,
         session: localStorage.getItem('Session')
     }, {

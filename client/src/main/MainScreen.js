@@ -7,7 +7,6 @@ import {GroupListAdminRequestTab} from "./group_lists_tab/GroupListAdminRequestT
 import {GroupListsSubscriptionsTab} from "./group_lists_tab/GroupListsSubscriptionsTab";
 
 export function MainScreen() {
-
     return (
         <Tabs isFitted variant='enclosed'>
             <TabList mb='1em'>

@@ -22,8 +22,10 @@ export function AuthScreen() {
 
     const navigate = useNavigate()
 
+    console.log("dfd", process.env.REACT_APP_PB_SERVER_IP);
     const handleClickEnter = () => {
-        axios.post('http://localhost:8080/auth',  {
+
+        axios.post(`http://${process.env.REACT_APP_PB_SERVER_IP}:8080/auth`,  {
             token: token
         }, {
             headers: new AxiosHeaders("Access-Control-Allow-Origin: *"),

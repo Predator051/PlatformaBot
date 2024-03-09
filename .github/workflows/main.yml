@@ -46,8 +46,8 @@ jobs:
           key: ${{ secrets.REMOTE_KEY }}
           port: 22
           script: |
-            rm -rv /var/www/html/platforma_bot_admin/*
-            cp github_action_deployments/platforma_bot/build/* /var/www/html/platforma_bot_admin/
+            rm -rf /var/www/html/platforma_bot_admin/*
+            cp -r github_action_deployments/platforma_bot/build/* /var/www/html/platforma_bot_admin/
       
       - name: setup server
         uses: appleboy/ssh-action@v1.0.3

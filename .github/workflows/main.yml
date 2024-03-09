@@ -47,5 +47,18 @@ jobs:
           port: 22
           script: |
             rm -rv /var/www/html/platforma_bot_admin/*
-            cp build/* /var/www/html/platforma_bot_admin/
+            cp github_action_deployments/platforma_bot/build/* /var/www/html/platforma_bot_admin/
+      
+      - name: setup server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: root
+          key: ${{ secrets.REMOTE_KEY }}
+          port: 22
+          script: |
+            systemctl stop pbserver.service
+            rm /var/www/pbserver/server_bin
+            cp github_action_deployments/platforma_bot/server_bin /var/www/pbserver/server_bin
+            systemctl start pbserver.service
           

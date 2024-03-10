@@ -16,6 +16,7 @@ import {
 export function GroupListTab() {
     let [groupLists, setGroupLists] = useState([])
     let [newGroupList, setNewGroupList] = useState("")
+    const [selectedGroupList, setSelectedGroupList] = useState(0)
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     useEffect(() => {
@@ -35,6 +36,9 @@ export function GroupListTab() {
     }
 
     const clickDeleteGroupList = (id) => {
+        if (id === 0) {return}
+
+        console.log("Delete by id: ", id)
         SendPost("api/delete/group_lists", {id}).then(value => {
             SendPost('api/group_lists', {}).then(r => {
                 setGroupLists(r.data)
@@ -62,31 +66,35 @@ export function GroupListTab() {
                             <Flex height={10}>
                                 {v.Name}
                                 <Spacer/>
-                                <Button colorScheme='red' leftIcon={<MdDelete/>} onClick={onOpen}>
+                                <Button colorScheme='red' leftIcon={<MdDelete/>} onClick={() => {
+                                    setSelectedGroupList(v.ID);
+                                    onOpen();
+                                }}>
                                     Delete
                                 </Button>
                             </Flex>
                             <Divider/>
-                            <Modal onClose={onClose} isOpen={isOpen} isCentered>
-                                <ModalOverlay />
-                                <ModalContent>
-                                    <ModalHeader>Are you sure?</ModalHeader>
-                                    <ModalCloseButton />
-                                    <ModalBody>
-                                        All admins and connect groups will be deleted!
-                                    </ModalBody>
-                                    <ModalFooter>
-                                        <Button onClick={onClose} mr={3}>Close</Button>
-                                        <Button onClick={() => {
-                                            clickDeleteGroupList(v.ID);
-                                            onClose();
-                                        }} colorScheme='red' >Delete</Button>
-                                    </ModalFooter>
-                                </ModalContent>
-                            </Modal>
                         </ListItem>)
                     }
                 </OrderedList>
+                <Modal onClose={onClose} isOpen={isOpen} isCentered>
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Are you sure?</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                            All admins and connect groups will be deleted!
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button onClick={onClose} mr={3}>Close</Button>
+                            <Button onClick={() => {
+                                clickDeleteGroupList(selectedGroupList);
+                                setSelectedGroupList(0);
+                                onClose();
+                            }} colorScheme='red'>Delete</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
             </Stack>
         </Box>
 

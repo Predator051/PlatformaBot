@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 	"server/db"
 )
@@ -24,6 +25,39 @@ func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) 
 	}
 
 	defer conn.Close(db.Ctx)
+
+	err = db.New(conn).DeleteGroupListAdminsByGroupListId(db.Ctx, pgtype.Int4{
+		Int32: int32(parsedBody["id"].(float64)),
+		Valid: true,
+	})
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("Error while fetch group lists: " + err.Error()))
+		return
+	}
+
+	err = db.New(conn).DeleteSubscriptionToGroupListByGroupListId(db.Ctx, pgtype.Int4{
+		Int32: int32(parsedBody["id"].(float64)),
+		Valid: true,
+	})
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("Error while fetch group lists: " + err.Error()))
+		return
+	}
+
+	err = db.New(conn).DeleteListAdminsGroupListRequestByGroupId(db.Ctx, pgtype.Int4{
+		Int32: int32(parsedBody["id"].(float64)),
+		Valid: true,
+	})
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("Error while fetch group lists: " + err.Error()))
+		return
+	}
 
 	err = db.New(conn).DeleteGroupList(db.Ctx, int64(parsedBody["id"].(float64)))
 

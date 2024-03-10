@@ -24,6 +24,9 @@ delete from admins_of_group_list_request where id = $1;
 -- name: DeleteListAdminsGroupListRequestByGroupAndChatId :exec
 delete from admins_of_group_list_request where group_list_id = $1 and chat_id = $2;
 
+-- name: DeleteListAdminsGroupListRequestByGroupId :exec
+delete from admins_of_group_list_request where group_list_id = $1;
+
 ----------GROUP LIST ADMINS----------
 
 -- name: InsertGroupListAdmins :exec
@@ -31,6 +34,9 @@ insert into group_lists_admins (id, chat_id, group_list_id) VALUES (default, $1,
 
 -- name: DeleteGroupListAdmins :exec
 delete from group_lists_admins where id = $1;
+
+-- name: DeleteGroupListAdminsByGroupListId :exec
+delete from group_lists_admins where group_list_id = $1;
 
 -- name: GroupListsByAdmin :many
 select * from group_lists_admins where chat_id = $1;
@@ -48,6 +54,9 @@ select * from subscription_to_group_lists where group_list_id = $1;
 
 -- name: DeleteSubscriptionToGroupList :exec
 delete from subscription_to_group_lists where id = $1;
+
+-- name: DeleteSubscriptionToGroupListByGroupListId :exec
+delete from subscription_to_group_lists where group_list_id = $1;
 
 -- name: SubscriptionToGroupLists :many
 select * from subscription_to_group_lists;

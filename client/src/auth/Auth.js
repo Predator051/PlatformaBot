@@ -3,7 +3,7 @@ import {
     AlertIcon,
     Box,
     Button,
-    Center,
+    Center, Flex,
     Input,
     InputGroup,
     InputRightElement,
@@ -40,8 +40,8 @@ export function AuthScreen() {
     }
 
     return (
-        <Center>
-            <Box>
+        <Flex justify="center" align="center" h={'100vh'}>
+            <Box >
                 <Stack spacing={3}>
                 <Center>
                     <InputGroup size='md'>
@@ -66,6 +66,6 @@ export function AuthScreen() {
                 </Alert>
                 </Stack>
             </Box>
-        </Center>
+        </Flex>
     )
 }

@@ -1,14 +1,15 @@
 import './App.css';
 import { AuthScreen } from "./auth/Auth";
-import { ChakraProvider } from '@chakra-ui/react'
+import {Box, ChakraProvider} from '@chakra-ui/react'
 import {MainScreen} from "./main/MainScreen";
-import {createBrowserRouter, redirect, RouterProvider, useNavigate} from "react-router-dom";
+import {createBrowserRouter, Navigate, redirect, RouterProvider, useNavigate} from "react-router-dom";
 
 function AuthCheck({component: Component}) {
     const navigate = useNavigate()
 
     if (!localStorage.getItem('Session')) {
-        return navigate('/auth')
+        console.log("No session");
+        return <Navigate to={'/auth'}></Navigate>
     }
 
     return (<Component/>)
@@ -26,9 +27,9 @@ function App() {
         }]);
   return (
       <ChakraProvider>
-          <div className="App">
+          <Box className="App" h={'100vh'}>
                 <RouterProvider router={router}></RouterProvider>
-          </div>
+          </Box>
       </ChakraProvider>
   );
 }

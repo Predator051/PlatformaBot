@@ -29,6 +29,15 @@ func (q *Queries) DeleteGroupListAdmins(ctx context.Context, id int64) error {
 	return err
 }
 
+const deleteGroupListAdminsByGroupListId = `-- name: DeleteGroupListAdminsByGroupListId :exec
+delete from group_lists_admins where group_list_id = $1
+`
+
+func (q *Queries) DeleteGroupListAdminsByGroupListId(ctx context.Context, groupListID pgtype.Int4) error {
+	_, err := q.db.Exec(ctx, deleteGroupListAdminsByGroupListId, groupListID)
+	return err
+}
+
 const deleteListAdminsGroupListRequest = `-- name: DeleteListAdminsGroupListRequest :exec
 delete from admins_of_group_list_request where id = $1
 `
@@ -52,12 +61,30 @@ func (q *Queries) DeleteListAdminsGroupListRequestByGroupAndChatId(ctx context.C
 	return err
 }
 
+const deleteListAdminsGroupListRequestByGroupId = `-- name: DeleteListAdminsGroupListRequestByGroupId :exec
+delete from admins_of_group_list_request where group_list_id = $1
+`
+
+func (q *Queries) DeleteListAdminsGroupListRequestByGroupId(ctx context.Context, groupListID pgtype.Int4) error {
+	_, err := q.db.Exec(ctx, deleteListAdminsGroupListRequestByGroupId, groupListID)
+	return err
+}
+
 const deleteSubscriptionToGroupList = `-- name: DeleteSubscriptionToGroupList :exec
 delete from subscription_to_group_lists where id = $1
 `
 
 func (q *Queries) DeleteSubscriptionToGroupList(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteSubscriptionToGroupList, id)
+	return err
+}
+
+const deleteSubscriptionToGroupListByGroupListId = `-- name: DeleteSubscriptionToGroupListByGroupListId :exec
+delete from subscription_to_group_lists where group_list_id = $1
+`
+
+func (q *Queries) DeleteSubscriptionToGroupListByGroupListId(ctx context.Context, groupListID pgtype.Int4) error {
+	_, err := q.db.Exec(ctx, deleteSubscriptionToGroupListByGroupListId, groupListID)
 	return err
 }
 

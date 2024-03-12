@@ -27,10 +27,21 @@ func SendMsgToChannel(bot *telego.Bot, update *objects.Update) {
 
 	defer conn.Close(db.Ctx)
 
-	subscribedGroupLists, err := db.New(conn).SubscriptionToGroupListsByChatId(db.Ctx, pgtype.Int8{
+	subscribedGroupLists, err := db.New(conn).GroupListsByAdmin(db.Ctx, pgtype.Int8{
 		Int64: int64(update.Message.Chat.Id),
 		Valid: true,
 	})
+
+	if len(subscribedGroupLists) <= 0 {
+		bot.SendMessage(
+			update.Message.Chat.Id,
+			"You aren't admin of any channel",
+			"",
+			update.Message.MessageId,
+			false,
+			false)
+		return
+	}
 
 	kb := bot.CreateInlineKeyboard()
 

@@ -1,23 +1,22 @@
 import {SendPost} from "../../request/Api";
 import React, {useEffect, useState} from "react";
-import { MdDelete } from "react-icons/md"
 import {
     Box,
     Button, Grid, GridItem, List,
     ListItem
 } from "@chakra-ui/react";
 
-export function GroupListsSubscriptionsTab() {
-    let [groupLists, setGroupLists] = useState([])
+export function ChannelsSubscriptionsTab() {
+    let [channels, setChannels] = useState([])
     let [subscriptions, setSubscriptions] = useState([])
-    let [currentGroupListId, setCurrentGroupListId] = useState(-1)
+    let [currentChannelId, setCurrentChannelId] = useState(-1)
 
     useEffect(() => {
-        SendPost('api/group_lists', {}).then(r => {
-            setGroupLists(r.data)
+        SendPost('api/channels', {}).then(r => {
+            setChannels(r.data)
             console.log(r.data)
         })
-        SendPost('api/group_lists/subscriptions', {}).then(r => {
+        SendPost('api/channels/subscriptions', {}).then(r => {
             setSubscriptions(r.data)
             console.log(r.data)
         })
@@ -34,13 +33,13 @@ export function GroupListsSubscriptionsTab() {
                 <GridItem rowSpan={2} colSpan={1}>
                         <List>
                             {
-                                groupLists?.map((v) => <ListItem itemID={v.ID} key={v.ID}>
-                                    <Button width="-webkit-fill-available" borderRadius={""} onClick={()=> {setCurrentGroupListId(v.ID)}}>{v.Name}</Button>
+                                channels?.map((v) => <ListItem itemID={v.ID} key={v.ID}>
+                                    <Button width="-webkit-fill-available" borderRadius={""} onClick={()=> {setCurrentChannelId(v.ID)}}>{v.Name}</Button>
                                 </ListItem>)
                             }
                         </List>
                 </GridItem>
-                {subscriptions?.filter(v => v.GroupListID === currentGroupListId).map((v) => <GridItem colSpan={4} bg='lightgrey'>
+                {subscriptions?.filter(v => v.ChannelsID === currentChannelId).map((v) => <GridItem colSpan={4} bg='lightgrey'>
                     <p>Type: {v.ChatType}</p>
                     <p>Name: {v.Username} {v.Title}</p>
                 </GridItem>)}

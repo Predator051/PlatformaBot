@@ -2,9 +2,9 @@ import {
 Tab, TabList, TabPanel, TabPanels, Tabs
 } from '@chakra-ui/react'
 import React from "react";
-import {GroupListTab} from "./group_lists_tab/GroupListTab";
-import {GroupListAdminRequestTab} from "./group_lists_tab/GroupListAdminRequestTab";
-import {GroupListsSubscriptionsTab} from "./group_lists_tab/GroupListsSubscriptionsTab";
+import {ChannelsTab} from "./channels_tab/ChannelsTab";
+import {ChannelAdminRequestTab} from "./channels_tab/ChannelAdminRequestTab";
+import {ChannelsSubscriptionsTab} from "./channels_tab/ChannelSubscriptionsTab";
 
 export function MainScreen() {
     return (
@@ -16,13 +16,13 @@ export function MainScreen() {
             </TabList>
             <TabPanels>
                 <TabPanel>
-                    <GroupListTab></GroupListTab>
+                    <ChannelsTab></ChannelsTab>
                 </TabPanel>
                 <TabPanel>
-                    <GroupListAdminRequestTab></GroupListAdminRequestTab>
+                    <ChannelAdminRequestTab></ChannelAdminRequestTab>
                 </TabPanel>
                 <TabPanel>
-                    <GroupListsSubscriptionsTab></GroupListsSubscriptionsTab>
+                    <ChannelsSubscriptionsTab></ChannelsSubscriptionsTab>
                 </TabPanel>
             </TabPanels>
         </Tabs>

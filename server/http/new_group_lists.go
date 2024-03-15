@@ -25,7 +25,7 @@ func NewGroupListRequest(writer http.ResponseWriter, request *http.Request) {
 
 	defer conn.Close(db.Ctx)
 
-	err = db.New(conn).InsertNewGroupList(db.Ctx, parsedBody["name"].(string))
+	err = db.New(conn).InsertNewChannel(db.Ctx, parsedBody["name"].(string))
 
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)

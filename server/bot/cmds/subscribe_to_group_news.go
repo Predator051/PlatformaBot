@@ -62,33 +62,33 @@ func SubscribeToGroupNews(bot *telego.Bot, update *objects.Update) {
 
 	defer conn.Close(db.Ctx)
 
-	groupLists, err := db.New(conn).ListGroupList(db.Ctx)
+	channels, err := db.New(conn).ListChannels(db.Ctx)
 
-	subscribedGroupLists, err := db.New(conn).SubscriptionToGroupListsByChatId(db.Ctx, pgtype.Int8{
+	subscribedChannels, err := db.New(conn).SubscriptionToChannelsByChatId(db.Ctx, pgtype.Int8{
 		Int64: int64(update.Message.Chat.Id),
 		Valid: true,
 	})
 
 	kb := bot.CreateInlineKeyboard()
 
-	for i, groupList := range helper.FilterSlices(groupLists, func(glist db.GroupList) bool {
-		return slices.IndexFunc(subscribedGroupLists, func(stlist db.SubscriptionToGroupList) bool {
-			return stlist.GroupListID.Int32 == int32(glist.ID)
+	for i, channel := range helper.FilterSlices(channels, func(glist db.Channel) bool {
+		return slices.IndexFunc(subscribedChannels, func(stlist db.SubscriptionToChannel) bool {
+			return stlist.ChannelsID.Int32 == int32(glist.ID)
 		}) == -1
 	}) {
-		kb.AddCallbackButtonHandler(groupList.Name, strconv.FormatInt(groupList.ID, 10), i+1, func(u *objects.Update) {
+		kb.AddCallbackButtonHandler(channel.Name, strconv.FormatInt(channel.ID, 10), i+1, func(u *objects.Update) {
 			c, _ := db.NewConn()
 
 			defer c.Close(db.Ctx)
 
-			groupListID, _ := strconv.ParseInt(u.CallbackQuery.Data, 10, 64)
-			db.New(c).InsertSubscriptionToGroupList(db.Ctx, db.InsertSubscriptionToGroupListParams{
+			channelID, _ := strconv.ParseInt(u.CallbackQuery.Data, 10, 64)
+			db.New(c).InsertSubscriptionToChannel(db.Ctx, db.InsertSubscriptionToChannelParams{
 				ChatID: pgtype.Int8{
 					Int64: int64(u.CallbackQuery.Message.Chat.Id),
 					Valid: true,
 				},
-				GroupListID: pgtype.Int4{
-					Int32: int32(groupListID),
+				ChannelsID: pgtype.Int4{
+					Int32: int32(channelID),
 					Valid: true,
 				},
 				Username: pgtype.Text{

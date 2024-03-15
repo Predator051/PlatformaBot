@@ -5,7 +5,7 @@ import (
 	"github.com/SakoDroid/telego/v2"
 	"github.com/SakoDroid/telego/v2/objects"
 	"github.com/jackc/pgx/v5/pgtype"
-	"log"
+	"server/bot/channels"
 	"server/db"
 	"strconv"
 )
@@ -27,12 +27,12 @@ func SendMsgToChannel(bot *telego.Bot, update *objects.Update) {
 
 	defer conn.Close(db.Ctx)
 
-	subscribedGroupLists, err := db.New(conn).GroupListsByAdmin(db.Ctx, pgtype.Int8{
+	subscribedChannels, err := db.New(conn).ChannelsByAdmin(db.Ctx, pgtype.Int8{
 		Int64: int64(update.Message.Chat.Id),
 		Valid: true,
 	})
 
-	if len(subscribedGroupLists) <= 0 {
+	if len(subscribedChannels) <= 0 {
 		bot.SendMessage(
 			update.Message.Chat.Id,
 			"You aren't admin of any channel",
@@ -45,8 +45,8 @@ func SendMsgToChannel(bot *telego.Bot, update *objects.Update) {
 
 	kb := bot.CreateInlineKeyboard()
 
-	for i, subscriptionToGroupList := range subscribedGroupLists {
-		grl, err := db.New(conn).GroupListById(db.Ctx, int64(subscriptionToGroupList.GroupListID.Int32))
+	for i, subscriptionToGroupList := range subscribedChannels {
+		grl, err := db.New(conn).ChannelById(db.Ctx, int64(subscriptionToGroupList.ChannelsID.Int32))
 
 		if err != nil {
 			bot.SendMessage(
@@ -76,16 +76,12 @@ func SendMsgToChannel(bot *telego.Bot, update *objects.Update) {
 
 			defer c.Close(db.Ctx)
 
-			groupListID, _ := strconv.ParseInt(u.CallbackQuery.Data, 10, 64)
-			chats, err := db.New(c).SubscriptionToGroupListsByGroupListId(db.Ctx, pgtype.Int4{
-				Valid: true,
-				Int32: int32(groupListID),
-			})
+			err := channels.SentMsg(bot, c, nextUpdate.Message.Text, grl)
 
 			if err != nil {
 				bot.SendMessage(
 					nextUpdate.Message.Chat.Id,
-					"Can't get chats from db",
+					"Error with sending msg",
 					"",
 					nextUpdate.Message.MessageId,
 					false,
@@ -93,20 +89,36 @@ func SendMsgToChannel(bot *telego.Bot, update *objects.Update) {
 				return
 			}
 
-			for _, chat := range chats {
-				//-4114494287
-				_, err = bot.SendMessage(
-					int(chat.ChatID.Int64),
-					fmt.Sprintf("%s: %s", grl.Name, nextUpdate.Message.Text),
-					"",
-					0,
-					false,
-					false)
-
-				if err != nil {
-					log.Println(err.Error(), int(chat.ChatID.Int64))
-				}
-			}
+			//groupListID, _ := strconv.ParseInt(u.CallbackQuery.Data, 10, 64)
+			//chats, err := db.New(c).SubscriptionToChannelsByGroupListId(db.Ctx, pgtype.Int4{
+			//	Valid: true,
+			//	Int32: int32(groupListID),
+			//})
+			//
+			//if err != nil {
+			//	bot.SendMessage(
+			//		nextUpdate.Message.Chat.Id,
+			//		"Can't get chats from db",
+			//		"",
+			//		nextUpdate.Message.MessageId,
+			//		false,
+			//		false)
+			//	return
+			//}
+			//
+			//for _, chat := range chats {
+			//	_, err = bot.SendMessage(
+			//		int(chat.ChatID.Int64),
+			//		fmt.Sprintf("%s: %s", grl.Name, nextUpdate.Message.Text),
+			//		"",
+			//		0,
+			//		false,
+			//		false)
+			//
+			//	if err != nil {
+			//		log.Println(err.Error(), int(chat.ChatID.Int64))
+			//	}
+			//}
 
 			bot.SendMessage(
 				nextUpdate.Message.Chat.Id,

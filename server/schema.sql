@@ -1,41 +1,40 @@
-CREATE TABLE group_lists
+CREATE TABLE channels
 (
     id   BIGSERIAL PRIMARY KEY,
     name text NOT NULL
 );
 
-
-CREATE TABLE admins_of_group_list_request (
+CREATE TABLE admins_of_channels_request (
                              id   BIGSERIAL PRIMARY KEY,
                              chat_id bigint,
-                             group_list_id integer ,
+                             channels_id integer ,
                              username text,
                              first_name text,
                              second_name text,
                              CONSTRAINT fk_customer
-                                 FOREIGN KEY(group_list_id)
-                                     REFERENCES group_lists(id)
+                                 FOREIGN KEY(channels_id)
+                                     REFERENCES channels(id)
 );
 
-CREATE TABLE group_lists_admins
+CREATE TABLE channels_admins
 (
     id   BIGSERIAL PRIMARY KEY,
     chat_Id bigint,
-    group_list_id integer,
-    CONSTRAINT fk_group_lists
-        FOREIGN KEY(group_list_id)
-        REFERENCES group_lists(id)
+    channels_id integer,
+    CONSTRAINT fk_channels
+        FOREIGN KEY(channels_id)
+        REFERENCES channels(id)
 );
 
-CREATE TABLE subscription_to_group_lists
+CREATE TABLE subscription_to_channels
 (
     id   BIGSERIAL PRIMARY KEY,
     chat_Id bigint,
-    group_list_id integer,
+    channels_id integer,
     username text,
     title text,
     chat_type text,
-    CONSTRAINT fk_group_lists
-        FOREIGN KEY(group_list_id)
-            REFERENCES group_lists(id)
+    CONSTRAINT fk_channels
+        FOREIGN KEY(channels_id)
+            REFERENCES channels(id)
 );

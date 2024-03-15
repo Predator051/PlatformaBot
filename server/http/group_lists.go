@@ -6,7 +6,7 @@ import (
 	"server/db"
 )
 
-func GroupListsRequest(writer http.ResponseWriter, request *http.Request) {
+func ChannelsRequest(writer http.ResponseWriter, request *http.Request) {
 	conn, err := db.NewConn()
 
 	if err != nil {
@@ -17,7 +17,7 @@ func GroupListsRequest(writer http.ResponseWriter, request *http.Request) {
 
 	defer conn.Close(db.Ctx)
 
-	groupList, err := db.New(conn).ListGroupList(db.Ctx)
+	channel, err := db.New(conn).ListChannels(db.Ctx)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -25,7 +25,7 @@ func GroupListsRequest(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	responseData, err := json.Marshal(groupList)
+	responseData, err := json.Marshal(channel)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)

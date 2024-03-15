@@ -6,7 +6,7 @@ import (
 	"server/db"
 )
 
-func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) {
+func DeleteChannelsRequest(writer http.ResponseWriter, request *http.Request) {
 
 	parsedBody := parseBody(request, &writer)
 
@@ -26,7 +26,7 @@ func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) 
 
 	defer conn.Close(db.Ctx)
 
-	err = db.New(conn).DeleteGroupListAdminsByGroupListId(db.Ctx, pgtype.Int4{
+	err = db.New(conn).DeleteChannelAdminsByChannelId(db.Ctx, pgtype.Int4{
 		Int32: int32(parsedBody["id"].(float64)),
 		Valid: true,
 	})
@@ -37,7 +37,7 @@ func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	err = db.New(conn).DeleteSubscriptionToGroupListByGroupListId(db.Ctx, pgtype.Int4{
+	err = db.New(conn).DeleteSubscriptionToChannelByChannelId(db.Ctx, pgtype.Int4{
 		Int32: int32(parsedBody["id"].(float64)),
 		Valid: true,
 	})
@@ -48,7 +48,7 @@ func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	err = db.New(conn).DeleteListAdminsGroupListRequestByGroupId(db.Ctx, pgtype.Int4{
+	err = db.New(conn).DeleteListAdminsChannelRequestByChannelId(db.Ctx, pgtype.Int4{
 		Int32: int32(parsedBody["id"].(float64)),
 		Valid: true,
 	})
@@ -59,7 +59,7 @@ func DeleteGroupListsRequest(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	err = db.New(conn).DeleteGroupList(db.Ctx, int64(parsedBody["id"].(float64)))
+	err = db.New(conn).DeleteChannel(db.Ctx, int64(parsedBody["id"].(float64)))
 
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)

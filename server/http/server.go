@@ -37,12 +37,13 @@ func NewServer(port int) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/auth", AuthRequest).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/group_lists", GroupListsRequest).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/new/group_lists", NewGroupListRequest).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/delete/group_lists", DeleteGroupListsRequest).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/group_lists/admin/requests", GroupListsAdminRequestsRequest).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/group_lists/admin/accept", GroupListsAdminAccept).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/group_lists/subscriptions", GroupListsSubscriptions).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/channels", ChannelsRequest).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/new/channels", NewGroupListRequest).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/delete/channels", DeleteChannelsRequest).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/channels/admin/requests", ChannelsAdminRequestsRequest).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/channels/admin/accept", ChannelsAdminAccept).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/channels/subscriptions", ChannelsSubscriptions).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/channels/send/msg", SentMsgToChannelsRequest).Methods(http.MethodPost, http.MethodOptions)
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "http://127.0.0.1:8080", "*"},

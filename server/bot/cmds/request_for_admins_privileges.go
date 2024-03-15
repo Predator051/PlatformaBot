@@ -27,7 +27,7 @@ func RequestForAdminsPrivileges(bot *telego.Bot, update *objects.Update) {
 
 	defer conn.Close(db.Ctx)
 
-	groupLists, err := db.New(conn).ListGroupList(db.Ctx)
+	channels, err := db.New(conn).ListChannels(db.Ctx)
 
 	if err != nil {
 		bot.SendMessage(
@@ -41,8 +41,8 @@ func RequestForAdminsPrivileges(bot *telego.Bot, update *objects.Update) {
 
 	kb := bot.CreateInlineKeyboard()
 
-	for i, groupList := range groupLists {
-		kb.AddCallbackButtonHandler(groupList.Name, strconv.FormatInt(groupList.ID, 10), i+1, func(u *objects.Update) {
+	for i, channel := range channels {
+		kb.AddCallbackButtonHandler(channel.Name, strconv.FormatInt(channel.ID, 10), i+1, func(u *objects.Update) {
 			c, _ := db.NewConn()
 
 			defer c.Close(db.Ctx)
@@ -50,7 +50,7 @@ func RequestForAdminsPrivileges(bot *telego.Bot, update *objects.Update) {
 			chat := u.CallbackQuery.Message.Chat
 			groupListID, _ := strconv.ParseInt(u.CallbackQuery.Data, 10, 64)
 
-			db.New(c).InsertListAdminsGroupListRequest(db.Ctx, db.InsertListAdminsGroupListRequestParams{
+			db.New(c).InsertListAdminsChannelRequest(db.Ctx, db.InsertListAdminsChannelRequestParams{
 				Username: pgtype.Text{
 					String: chat.Username,
 					Valid:  true,
@@ -67,7 +67,7 @@ func RequestForAdminsPrivileges(bot *telego.Bot, update *objects.Update) {
 					String: chat.LastName,
 					Valid:  true,
 				},
-				GroupListID: pgtype.Int4{
+				ChannelsID: pgtype.Int4{
 					Int32: int32(groupListID),
 					Valid: true,
 				},
